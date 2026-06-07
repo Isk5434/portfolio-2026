@@ -56,12 +56,155 @@ body {
   }
 }
 
-/* Editorial display type — Parisienne script */
+/* Editorial display type — Poly serif */
 .display {
-  font-family: var(--font-parisienne), "Brush Script MT", cursive;
+  font-family: var(--font-poly), Georgia, "Times New Roman", serif;
   font-weight: 400;
-  letter-spacing: 0;
-  line-height: 1.05;
+  letter-spacing: -0.02em;
+  line-height: 0.98;
+}
+
+/* Butler — high-contrast fashion serif (VOGUE-style), self-hosted.
+   Used only for the hero "PERSON" title via .title-butler. */
+@font-face {
+  font-family: "Butler";
+  src: url("./fonts/butler-regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Butler";
+  src: url("./fonts/butler-bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+.title-butler {
+  font-family: "Butler", var(--font-poly), Georgia, serif;
+  letter-spacing: -0.01em;
+}
+
+@property --vr-wipe {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+/* Opening loader: hold at 100%, then dissolve out like a VR Gradient Wipe. */
+.loader-overlay {
+  isolation: isolate;
+  background: transparent;
+  overflow: hidden;
+}
+.loader-overlay::before {
+  content: "";
+  position: absolute;
+  inset: -14%;
+  z-index: 0;
+  --vr-wipe: 0%;
+  background:
+    radial-gradient(circle at 24% 44%, rgba(255, 255, 255, 0.08), transparent 24%),
+    linear-gradient(118deg, transparent 0 40%, rgba(255, 255, 255, 0.08) 48%, transparent 58%),
+    var(--bg);
+  -webkit-mask-image:
+    radial-gradient(
+      ellipse 112% 78% at 24% 46%,
+      transparent 0 var(--vr-wipe),
+      rgba(0, 0, 0, 0.18) calc(var(--vr-wipe) + 6%),
+      rgba(0, 0, 0, 0.76) calc(var(--vr-wipe) + 15%),
+      #000 calc(var(--vr-wipe) + 25%)
+    ),
+    linear-gradient(
+      118deg,
+      transparent 0 calc(var(--vr-wipe) - 12%),
+      rgba(0, 0, 0, 0.28) calc(var(--vr-wipe) + 2%),
+      #000 calc(var(--vr-wipe) + 18%)
+    );
+  mask-image:
+    radial-gradient(
+      ellipse 112% 78% at 24% 46%,
+      transparent 0 var(--vr-wipe),
+      rgba(0, 0, 0, 0.18) calc(var(--vr-wipe) + 6%),
+      rgba(0, 0, 0, 0.76) calc(var(--vr-wipe) + 15%),
+      #000 calc(var(--vr-wipe) + 25%)
+    ),
+    linear-gradient(
+      118deg,
+      transparent 0 calc(var(--vr-wipe) - 12%),
+      rgba(0, 0, 0, 0.28) calc(var(--vr-wipe) + 2%),
+      #000 calc(var(--vr-wipe) + 18%)
+    );
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  will-change: filter, transform, --vr-wipe;
+}
+.loader-panel {
+  z-index: 2;
+  transition:
+    opacity 360ms ease,
+    transform 720ms cubic-bezier(0.76, 0, 0.24, 1),
+    filter 720ms ease;
+}
+.loader-vr-glow {
+  position: absolute;
+  z-index: 3;
+  inset: -10%;
+  background:
+    radial-gradient(ellipse 88% 56% at 24% 46%, transparent 0 27%, rgba(255, 255, 255, 0.7) 35%, transparent 52%),
+    radial-gradient(ellipse 96% 62% at 26% 48%, transparent 0 30%, rgba(255, 59, 48, 0.34) 38%, transparent 56%),
+    radial-gradient(ellipse 104% 70% at 22% 43%, transparent 0 34%, rgba(90, 160, 255, 0.3) 43%, transparent 62%);
+  filter: blur(18px) saturate(1.35);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transform: scale(0.94) rotate(-4deg);
+  pointer-events: none;
+}
+.loader-overlay--leaving {
+  pointer-events: none;
+}
+.loader-overlay--leaving::before {
+  animation: vrGradientWipe 1500ms cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+.loader-overlay--leaving .loader-panel {
+  opacity: 0;
+  filter: blur(10px);
+  transform: translate(-50%, -62%) scale(0.98);
+}
+.loader-overlay--leaving .loader-vr-glow {
+  animation: vrGradientGlow 1500ms cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+@keyframes vrGradientWipe {
+  0% {
+    --vr-wipe: 0%;
+    filter: blur(0) saturate(1);
+    transform: scale(1);
+  }
+  38% {
+    filter: blur(2px) saturate(1.18);
+    transform: scale(1.02) rotate(0.001deg);
+  }
+  100% {
+    --vr-wipe: 128%;
+    filter: blur(6px) saturate(1.35);
+    transform: scale(1.045) rotate(0.001deg);
+  }
+}
+@keyframes vrGradientGlow {
+  0% {
+    opacity: 0;
+    transform: scale(0.78) rotate(-6deg);
+  }
+  22% {
+    opacity: 1;
+  }
+  62% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.32) rotate(4deg);
+  }
 }
 
 /* Infinite marquee */
@@ -122,32 +265,25 @@ body {
   }
 }
 
-/* Works cards — continuous flip around the vertical (Y) axis, PARCO-style.
-   Holds on each face, then turns; cards stagger via --flip-delay. */
+/* Works cards — perpetual flip around the vertical (Y) axis, PARCO-style.
+   Constant-speed turn that never stops; cards stagger via --flip-delay. */
 @keyframes flipY {
-  0%,
-  22% {
+  from {
     transform: rotateY(0deg);
   }
-  50%,
-  72% {
-    transform: rotateY(180deg);
-  }
-  100% {
+  to {
     transform: rotateY(360deg);
   }
 }
 .flip-card {
-  perspective: 1400px;
+  /* Flatter perspective so the constant-speed turn reads evenly (less edge looming) */
+  perspective: 2400px;
 }
 .flip-card-inner {
   transform-style: preserve-3d;
-  animation: flipY var(--flip-duration, 9s) ease-in-out infinite;
+  animation: flipY var(--flip-duration, 10s) linear infinite;
   animation-delay: var(--flip-delay, 0s);
   will-change: transform;
-}
-.flip-card:hover .flip-card-inner {
-  animation-play-state: paused;
 }
 .flip-face {
   backface-visibility: hidden;
@@ -157,11 +293,62 @@ body {
   transform: rotateY(180deg);
 }
 
+/* Celestial dial — slow, opposite-direction rotation of the outer ring + sun */
+@keyframes celestialSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.celestial-ring__spin,
+.celestial-ring__sun {
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform;
+}
+.celestial-ring__spin {
+  animation: celestialSpin 120s linear infinite;
+}
+.celestial-ring__sun {
+  animation: celestialSpin 90s linear infinite reverse;
+}
+.celestial-ring--bold :is(circle, line, path, text) {
+  opacity: 0.82;
+}
+.celestial-ring--bold .celestial-ring__sun line {
+  opacity: 0.55;
+}
+.massive-orbit__turn,
+.massive-orbit__counter {
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform;
+}
+.massive-orbit__turn {
+  animation: celestialSpin 180s linear infinite reverse;
+}
+.massive-orbit__counter {
+  animation: celestialSpin 240s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .marquee-track {
     animation: none;
   }
   .flip-card-inner {
+    animation: none;
+  }
+  .celestial-ring__spin,
+  .celestial-ring__sun,
+  .massive-orbit__turn,
+  .massive-orbit__counter {
+    animation: none;
+  }
+  .loader-overlay::before,
+  .loader-panel {
+    transition: none;
+  }
+  .loader-overlay--leaving::before,
+  .loader-overlay--leaving .loader-vr-glow {
     animation: none;
   }
 }

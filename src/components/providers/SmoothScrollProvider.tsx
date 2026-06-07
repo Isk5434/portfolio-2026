@@ -22,7 +22,9 @@ export default function SmoothScrollProvider({
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (params.has("nolenis") || reduce) setSmooth(false);
+    if (!params.has("nolenis") && !reduce) return;
+    const id = window.setTimeout(() => setSmooth(false), 0);
+    return () => window.clearTimeout(id);
   }, []);
 
   if (!smooth) return <>{children}</>;

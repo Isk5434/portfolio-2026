@@ -4,7 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import LiveClock from "@/components/ui/LiveClock";
 
 const FRAME_COUNT = 153;
-const framePath = (i: number) => `/frame/frame_${String(i).padStart(4, "0")}.jpg`;
+const PUBLIC_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const framePath = (i: number) =>
+  `${PUBLIC_BASE_PATH}/frame/frame_${String(i).padStart(4, "0")}.jpg`;
+const MOBILE_FRAME_HEIGHT_RATIO = 0.82;
+const MOBILE_FOCUS_X = 0.21;
+const LETTERBOX_COLOR = "#0b0b0b";
+const LOAD_HOLD_MS = 2000;
+const LOAD_EXIT_MS = 1700;
 
 // PARCO-style captions that fade in over the video at scroll thresholds.
 const captions = [
@@ -22,7 +29,9 @@ export default function Hero() {
   const currentFrameRef = useRef(-1);
   const prevVisibleRef = useRef("");
 
-  const [loaded, setLoaded] = useState(false);
+  const [framesReady, setFramesReady] = useState(false);
+  const [loaderDone, setLoaderDone] = useState(false);
+  const [loaderLeaving, setLoaderLeaving] = useState(false);
   const [loadPct, setLoadPct] = useState(0);
   const [visible, setVisible] = useState<Set<string>>(new Set());
 
@@ -32,22 +41,38 @@ export default function Hero() {
     const imgs: HTMLImageElement[] = [];
     for (let i = 1; i <= FRAME_COUNT; i++) {
       const img = new Image();
-      img.src = framePath(i);
       const done = () => {
         count++;
         setLoadPct(count / FRAME_COUNT);
-        if (count === FRAME_COUNT) setLoaded(true);
+        if (count === FRAME_COUNT) setFramesReady(true);
       };
       img.onload = done;
       img.onerror = done; // never stall on a single bad frame
+      img.src = framePath(i);
       imgs.push(img);
     }
     framesRef.current = imgs;
   }, []);
 
+  useEffect(() => {
+    if (!framesReady) return;
+
+    const hold = window.setTimeout(() => {
+      setLoaderLeaving(true);
+    }, LOAD_HOLD_MS);
+    const done = window.setTimeout(() => {
+      setLoaderDone(true);
+    }, LOAD_HOLD_MS + LOAD_EXIT_MS);
+
+    return () => {
+      window.clearTimeout(hold);
+      window.clearTimeout(done);
+    };
+  }, [framesReady]);
+
   // Canvas engine: DPR sizing, cover-fit draw, RAF + ticking-ref scroll handler.
   useEffect(() => {
-    if (!loaded) return;
+    if (!framesReady) return;
     const canvas = canvasRef.current;
     const section = sectionRef.current;
     if (!canvas || !section) return;
@@ -59,23 +84,29 @@ export default function Hero() {
       if (!img) return;
       const cw = window.innerWidth;
       const ch = window.innerHeight;
-      ctx.clearRect(0, 0, cw, ch);
+      ctx.fillStyle = LETTERBOX_COLOR;
+      ctx.fillRect(0, 0, cw, ch);
       const imgRatio = img.naturalWidth / img.naturalHeight;
       const canvasRatio = cw / ch;
       let drawW: number;
       let drawH: number;
-      if (canvasRatio > imgRatio) {
+      const portrait = cw <= 768;
+      if (portrait) {
+        drawH = ch * MOBILE_FRAME_HEIGHT_RATIO;
+        drawW = drawH * imgRatio;
+      } else if (canvasRatio > imgRatio) {
         drawW = cw;
         drawH = cw / imgRatio;
       } else {
         drawH = ch;
         drawW = ch * imgRatio;
       }
-      if (cw <= 768) {
-        drawW *= 1.3; // zoom in on mobile — subject reads larger
-        drawH *= 1.3;
-      }
-      ctx.drawImage(img, (cw - drawW) / 2, (ch - drawH) / 2, drawW, drawH);
+      // On phones, pull the 16:9 frame back slightly so the tall flowers stay in
+      // view; the frame's own black bands blend into the canvas background.
+      const focusX = portrait ? MOBILE_FOCUS_X : 0.5; // subject's horizontal centre (0 = left edge)
+      const dx = cw / 2 - focusX * drawW;
+      const dy = (ch - drawH) / 2;
+      ctx.drawImage(img, dx, dy, drawW, drawH);
       currentFrameRef.current = index;
     };
 
@@ -132,7 +163,7 @@ export default function Hero() {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", resize);
     };
-  }, [loaded]);
+  }, [framesReady]);
 
   return (
     <section
@@ -156,7 +187,7 @@ export default function Hero() {
             <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.35em] text-white/70">
               Portfolio — 2026
             </p>
-            <h1 className="display text-[22vw] text-white md:text-[15vw]">
+            <h1 className="display title-butler text-[22vw] text-white md:text-[15vw]">
               PERSON
             </h1>
             <p className="mt-6 max-w-[42ch] text-sm leading-relaxed text-white/85 md:text-base">
@@ -208,20 +239,27 @@ export default function Hero() {
         ))}
 
         {/* Frame preload overlay */}
-        {!loaded && (
-          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-bg">
-            <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-muted">
-              Loading frames
-            </p>
-            <div className="mt-5 h-px w-56 overflow-hidden bg-line">
-              <div
-                className="h-full bg-fg transition-[width] duration-150"
-                style={{ width: `${Math.round(loadPct * 100)}%` }}
-              />
+        {!loaderDone && (
+          <div
+            className={`loader-overlay absolute inset-0 z-30 ${
+              loaderLeaving ? "loader-overlay--leaving" : ""
+            }`}
+          >
+            <div className="loader-panel absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
+              <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-muted">
+                Loading frames
+              </p>
+              <div className="mt-5 h-px w-56 overflow-hidden bg-line">
+                <div
+                  className="h-full bg-fg transition-[width] duration-150"
+                  style={{ width: `${Math.round(loadPct * 100)}%` }}
+                />
+              </div>
+              <p className="mt-3 font-mono text-xs tabular-nums text-fg">
+                {String(Math.round(loadPct * 100)).padStart(3, "0")}%
+              </p>
             </div>
-            <p className="mt-3 font-mono text-xs tabular-nums text-fg">
-              {String(Math.round(loadPct * 100)).padStart(3, "0")}%
-            </p>
+            <div className="loader-vr-glow" aria-hidden="true" />
           </div>
         )}
       </div>

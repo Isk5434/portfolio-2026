@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Parisienne } from "next/font/google";
+import { Geist, Geist_Mono, Poly } from "next/font/google";
 import "./globals.css";
 import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
 
@@ -13,9 +13,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const parisienne = Parisienne({
-  variable: "--font-parisienne",
+const poly = Poly({
+  variable: "--font-poly",
   weight: "400",
+  style: ["normal", "italic"],
   subsets: ["latin"],
 });
 
@@ -33,7 +34,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${parisienne.variable} antialiased`}
+      // Lenis tags <html> with `lenis` classes on mount, and browser extensions
+      // inject attributes here too — both run before React hydrates, so the
+      // <html> attributes legitimately differ. Scoped to this element only.
+      suppressHydrationWarning
+      className={`${geistSans.variable} ${geistMono.variable} ${poly.variable} antialiased`}
     >
       <body>
         <SmoothScrollProvider>{children}</SmoothScrollProvider>

@@ -2,37 +2,51 @@
 
 import { useEffect, useState, type CSSProperties } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 import { AnimatedSection, AnimatedItem } from "@/components/ui/AnimatedSection";
 
-// Frames doubling as placeholder artwork — swap the images/titles for real work.
+const PUBLIC_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const publicPath = (path: string) => `${PUBLIC_BASE_PATH}${path}`;
+
+function moodFilter(luma: number, back = false) {
+  const brightness = luma >= 125 ? 0.58 : luma >= 108 ? 0.68 : luma >= 80 ? 0.78 : 0.92;
+  const backBoost = back ? 0.82 : 1;
+  return `grayscale(1) brightness(${brightness * backBoost}) contrast(1.12)`;
+}
+
+// Work imagery. Luma is sampled from the source image and used to auto-darken bright images.
 const works = [
   {
     n: "01",
     title: "Frame Sequence",
     cat: "Motion / Web",
     year: "2026",
-    img: "/frame/frame_0006.jpg",
+    img: "/work-images/work-01.png",
+    luma: 99.1,
   },
   {
     n: "02",
     title: "Editorial System",
     cat: "Art Direction",
     year: "2026",
-    img: "/frame/frame_0050.jpg",
+    img: "/work-images/work-02.png",
+    luma: 110.7,
   },
   {
     n: "03",
     title: "Interactive Hero",
     cat: "Creative Dev",
     year: "2025",
-    img: "/frame/frame_0098.jpg",
+    img: "/work-images/work-03.png",
+    luma: 36.5,
   },
   {
     n: "04",
     title: "Brand Identity",
     cat: "Identity",
     year: "2025",
-    img: "/frame/frame_0146.jpg",
+    img: "/work-images/work-04.png",
+    luma: 129,
   },
 ];
 
@@ -69,10 +83,11 @@ function FeaturedShowcase() {
         // eslint-disable-next-line @next/next/no-img-element
         <img
           key={w.n}
-          src={w.img}
+          src={publicPath(w.img)}
           alt=""
           aria-hidden
-          className={`absolute inset-0 h-full w-full object-cover grayscale transition-all duration-[1400ms] ease-out ${
+          style={{ filter: moodFilter(w.luma) }}
+          className={`absolute inset-0 h-full w-full object-cover transition-all duration-[1400ms] ease-out ${
             i === active ? "scale-100 opacity-[0.55]" : "scale-105 opacity-0"
           }`}
         />
@@ -108,6 +123,30 @@ function FeaturedShowcase() {
           </motion.div>
         </AnimatePresence>
       </div>
+
+      {/* Prev / next — sit above the title overlay */}
+      <button
+        type="button"
+        onClick={() => setActive((i) => (i - 1 + works.length) % works.length)}
+        aria-label="Previous project"
+        className="group absolute left-1 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center text-white/70 mix-blend-difference transition-colors hover:text-white md:left-4"
+      >
+        <CaretLeft
+          weight="light"
+          className="h-7 w-7 transition-transform duration-300 group-hover:-translate-x-0.5 md:h-9 md:w-9"
+        />
+      </button>
+      <button
+        type="button"
+        onClick={() => setActive((i) => (i + 1) % works.length)}
+        aria-label="Next project"
+        className="group absolute right-1 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center text-white/70 mix-blend-difference transition-colors hover:text-white md:right-4"
+      >
+        <CaretRight
+          weight="light"
+          className="h-7 w-7 transition-transform duration-300 group-hover:translate-x-0.5 md:h-9 md:w-9"
+        />
+      </button>
 
       {/* Progress rails — click to jump */}
       <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-2.5 md:bottom-8 md:gap-3">
@@ -165,30 +204,43 @@ export default function Works() {
                     <div className="flip-face absolute inset-0 overflow-hidden bg-black">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={w.img}
+                        src={publicPath(w.img)}
                         alt={w.title}
-                        className="h-full w-full object-cover opacity-85 grayscale"
+                        style={{ filter: moodFilter(w.luma) }}
+                        className="h-full w-full object-cover opacity-90"
                       />
+                      <div className="pointer-events-none absolute inset-0 bg-black/15 mix-blend-multiply" />
                       <span className="absolute left-4 top-4 font-mono text-xs tracking-[0.3em] text-white mix-blend-difference">
                         {w.n}
                       </span>
                     </div>
-                    {/* back — project info */}
-                    <div className="flip-face flip-face--back absolute inset-0 flex flex-col justify-between bg-fg p-5 text-fg-dark md:p-6">
-                      <span className="font-mono text-xs tracking-[0.3em]">
-                        {w.n}
-                      </span>
-                      <div>
-                        <h3 className="display text-2xl md:text-3xl">
-                          {w.title}
-                        </h3>
-                        <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.25em] text-fg-dark/55">
-                          {w.cat} — {w.year}
-                        </p>
+                    {/* back — same artwork, lightly faded, with project info on top */}
+                    <div className="flip-face flip-face--back absolute inset-0 overflow-hidden bg-black">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={publicPath(w.img)}
+                        alt=""
+                        aria-hidden
+                        style={{ filter: moodFilter(w.luma, true) }}
+                        className="absolute inset-0 h-full w-full object-cover opacity-60"
+                      />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/55" />
+                      <div className="relative flex h-full flex-col justify-between p-5 text-white md:p-6">
+                        <span className="font-mono text-xs tracking-[0.3em] text-white/90">
+                          {w.n}
+                        </span>
+                        <div>
+                          <h3 className="display text-2xl md:text-3xl">
+                            {w.title}
+                          </h3>
+                          <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.25em] text-white/70">
+                            {w.cat} — {w.year}
+                          </p>
+                          <span className="mt-4 inline-block font-mono text-[11px] uppercase tracking-[0.25em] text-white/85">
+                            View Project →
+                          </span>
+                        </div>
                       </div>
-                      <span className="font-mono text-[11px] uppercase tracking-[0.25em]">
-                        View Project →
-                      </span>
                     </div>
                   </div>
                 </div>
