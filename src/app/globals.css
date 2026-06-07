@@ -85,6 +85,96 @@ body {
   letter-spacing: -0.01em;
 }
 
+/* Pixel reveal for the first hero frame after preload completes. */
+.hero-pixel-reveal {
+  pointer-events: none;
+  left: 0;
+  top: 34%;
+  width: min(58vw, 360px);
+  height: min(34vh, 300px);
+  perspective: 720px;
+  perspective-origin: 38% 46%;
+}
+.hero-pixel-reveal__cell {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  isolation: isolate;
+  transform-style: preserve-3d;
+  transform: rotateX(0deg) rotateY(0deg) translateZ(0) scale(1.015);
+  animation: heroPixelReveal 820ms cubic-bezier(0.76, 0, 0.24, 1) var(--delay) forwards;
+  will-change: opacity, transform, filter;
+}
+.hero-pixel-reveal__cell::before,
+.hero-pixel-reveal__cell::after {
+  content: "";
+  position: absolute;
+  inset: -0.5px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.hero-pixel-reveal__cell::before {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent 34%),
+    linear-gradient(315deg, rgba(120, 170, 255, 0.1), transparent 42%),
+    rgba(7, 7, 7, 0.96);
+  box-shadow:
+    inset 0 0 8px rgba(255, 255, 255, 0.08),
+    0 0 10px rgba(255, 255, 255, 0.04);
+}
+.hero-pixel-reveal__cell::after {
+  background-image:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.38), transparent 24%, rgba(255, 255, 255, 0.08) 48%, transparent 66%),
+    inherit;
+  background-size:
+    100% 100%,
+    900% 1200%;
+  background-position:
+    0 0,
+    var(--bg-x) var(--bg-y);
+  background-repeat: no-repeat;
+  filter: saturate(0.45) contrast(1.08) brightness(0.78);
+  transform: rotateY(180deg) translateZ(0.5px);
+  box-shadow:
+    inset 0 0 12px rgba(255, 255, 255, 0.16),
+    inset 0 0 1px rgba(255, 255, 255, 0.75);
+}
+@keyframes heroPixelReveal {
+  0% {
+    opacity: 1;
+    filter: blur(0) saturate(1);
+    transform: rotateX(0deg) rotateY(0deg) translateZ(0) scale(1.015);
+  }
+  34% {
+    opacity: 1;
+    filter: blur(0.2px) saturate(1.25);
+    transform:
+      rotateX(var(--rotate-x-mid))
+      rotateY(var(--rotate-y-mid))
+      translateZ(10px)
+      scale(0.98);
+  }
+  68% {
+    opacity: 0.92;
+    filter: blur(0.4px) saturate(1.45);
+    transform:
+      rotateX(var(--rotate-x))
+      rotateY(var(--rotate-y))
+      translateZ(4px)
+      scale(0.96);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(1.6px) saturate(1.7);
+    transform:
+      rotateX(var(--rotate-x-end))
+      rotateY(var(--rotate-y-end))
+      translateZ(-8px)
+      scale(0.82);
+  }
+}
+
 @property --vr-wipe {
   syntax: "<percentage>";
   inherits: false;
@@ -350,5 +440,9 @@ body {
   .loader-overlay--leaving::before,
   .loader-overlay--leaving .loader-vr-glow {
     animation: none;
+  }
+  .hero-pixel-reveal__cell {
+    animation: none;
+    opacity: 0;
   }
 }

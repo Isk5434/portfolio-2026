@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import LiveClock from "@/components/ui/LiveClock";
 
 const FRAME_COUNT = 153;
@@ -12,6 +12,8 @@ const MOBILE_FOCUS_X = 0.21;
 const LETTERBOX_COLOR = "#0b0b0b";
 const LOAD_HOLD_MS = 2000;
 const LOAD_EXIT_MS = 1700;
+const PIXEL_REVEAL_COLS = 9;
+const PIXEL_REVEAL_ROWS = 12;
 
 // PARCO-style captions that fade in over the video at scroll thresholds.
 const captions = [
@@ -19,6 +21,23 @@ const captions = [
   { id: "c2", show: 0.4, hide: 0.62, kicker: "02 — Craft", text: "Meaning in detail." },
   { id: "c3", show: 0.68, hide: 0.94, kicker: "03 — Person", text: "Made by a person." },
 ];
+
+const pixelRevealCells = Array.from(
+  { length: PIXEL_REVEAL_COLS * PIXEL_REVEAL_ROWS },
+  (_, i) => {
+    const x = i % PIXEL_REVEAL_COLS;
+    const y = Math.floor(i / PIXEL_REVEAL_COLS);
+    const distance = Math.hypot(x - 3.2, y - 5.4);
+    const jitter = (x * 37 + y * 19) % 11;
+    return {
+      delay: Math.round(distance * 22 + jitter * 20),
+      bgX: (x / (PIXEL_REVEAL_COLS - 1)) * 100,
+      bgY: (y / (PIXEL_REVEAL_ROWS - 1)) * 100,
+      rotateX: ((x * 11 + y * 7) % 18) - 9,
+      rotateY: 126 + ((x * 13 + y * 5) % 34),
+    };
+  }
+);
 
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -32,6 +51,7 @@ export default function Hero() {
   const [framesReady, setFramesReady] = useState(false);
   const [loaderDone, setLoaderDone] = useState(false);
   const [loaderLeaving, setLoaderLeaving] = useState(false);
+  const [pixelRevealDone, setPixelRevealDone] = useState(false);
   const [loadPct, setLoadPct] = useState(0);
   const [visible, setVisible] = useState<Set<string>>(new Set());
 
@@ -57,6 +77,9 @@ export default function Hero() {
   useEffect(() => {
     if (!framesReady) return;
 
+    const pixelReveal = window.setTimeout(() => {
+      setPixelRevealDone(true);
+    }, 1350);
     const hold = window.setTimeout(() => {
       setLoaderLeaving(true);
     }, LOAD_HOLD_MS);
@@ -65,6 +88,7 @@ export default function Hero() {
     }, LOAD_HOLD_MS + LOAD_EXIT_MS);
 
     return () => {
+      window.clearTimeout(pixelReveal);
       window.clearTimeout(hold);
       window.clearTimeout(done);
     };
@@ -175,12 +199,12 @@ export default function Hero() {
         <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
 
         {/* legibility scrim */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/75" />
+        <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-b from-black/40 via-transparent to-black/75" />
 
         {/* Hero title — fades out on scroll via ref */}
         <div
           ref={heroTextRef}
-          className="pointer-events-none absolute inset-0 flex flex-col justify-between px-5 pb-12 pt-28 md:px-8 md:pb-16"
+          className="pointer-events-none absolute inset-0 z-[3] flex flex-col justify-between px-5 pb-12 pt-28 md:px-8 md:pb-16"
         >
           <div />
           <div>
@@ -225,7 +249,7 @@ export default function Hero() {
         {captions.map((c) => (
           <div
             key={c.id}
-            className={`pointer-events-none absolute bottom-24 right-5 max-w-[300px] text-right transition-all duration-500 md:bottom-28 md:right-10 ${
+            className={`pointer-events-none absolute bottom-24 right-5 z-[3] max-w-[300px] text-right transition-all duration-500 md:bottom-28 md:right-10 ${
               visible.has(c.id)
                 ? "translate-y-0 opacity-100"
                 : "translate-y-4 opacity-0"
@@ -245,6 +269,39 @@ export default function Hero() {
               loaderLeaving ? "loader-overlay--leaving" : ""
             }`}
           >
+            {framesReady && !pixelRevealDone && (
+              <div
+                className="hero-pixel-reveal absolute z-[1] grid"
+                style={{
+                  gridTemplateColumns: `repeat(${PIXEL_REVEAL_COLS}, 1fr)`,
+                  gridTemplateRows: `repeat(${PIXEL_REVEAL_ROWS}, 1fr)`,
+                  "--pixel-cols": PIXEL_REVEAL_COLS,
+                  "--pixel-rows": PIXEL_REVEAL_ROWS,
+                } as CSSProperties}
+                aria-hidden="true"
+              >
+                {pixelRevealCells.map((cell, i) => (
+                  <span
+                    key={i}
+                    className="hero-pixel-reveal__cell"
+                    style={
+                      {
+                        "--delay": `${cell.delay}ms`,
+                        "--bg-x": `${cell.bgX}%`,
+                        "--bg-y": `${cell.bgY}%`,
+                        "--rotate-x": `${cell.rotateX}deg`,
+                        "--rotate-y": `${cell.rotateY}deg`,
+                        "--rotate-x-mid": `${cell.rotateX * 0.45}deg`,
+                        "--rotate-y-mid": `${cell.rotateY * 0.42}deg`,
+                        "--rotate-x-end": `${cell.rotateX * 1.12}deg`,
+                        "--rotate-y-end": `${cell.rotateY + 42}deg`,
+                        backgroundImage: `url(${framePath(1)})`,
+                      } as CSSProperties
+                    }
+                  />
+                ))}
+              </div>
+            )}
             <div className="loader-panel absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
               <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-muted">
                 Loading frames

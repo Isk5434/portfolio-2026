@@ -6,6 +6,7 @@ const basePath = isGithubPages ? `/${repoName}` : "";
 
 const nextConfig: NextConfig = {
   output: "export",
+  poweredByHeader: false,
   images: {
     unoptimized: true,
   },
