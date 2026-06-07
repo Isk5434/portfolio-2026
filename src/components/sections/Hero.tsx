@@ -19,6 +19,8 @@ const captions = [
   { id: "c3", show: 0.68, hide: 0.94, kicker: "03 — Person", text: "Made by a person." },
 ];
 
+const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -27,13 +29,14 @@ export default function Hero() {
   const framesRef = useRef<HTMLImageElement[]>([]);
   const tickingRef = useRef(false);
   const currentFrameRef = useRef(-1);
-  const prevVisibleRef = useRef("");
+  const captionRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const viewportHRef = useRef(900);
 
   const [framesReady, setFramesReady] = useState(false);
   const [loaderDone, setLoaderDone] = useState(false);
   const [loaderLeaving, setLoaderLeaving] = useState(false);
   const [loadPct, setLoadPct] = useState(0);
-  const [visible, setVisible] = useState<Set<string>>(new Set());
+  const [titleReady, setTitleReady] = useState(false);
 
   // Preload every frame before the canvas starts drawing.
   useEffect(() => {
@@ -71,6 +74,16 @@ export default function Hero() {
     };
   }, [framesReady]);
 
+  // Track viewport height so a leaving caption can be flung to the very top.
+  useEffect(() => {
+    const setVH = () => {
+      viewportHRef.current = window.innerHeight;
+    };
+    setVH();
+    window.addEventListener("resize", setVH);
+    return () => window.removeEventListener("resize", setVH);
+  }, []);
+
   // Keep the hero title within its column on any device (any name length):
   // shrink the font only when the word would overflow, never enlarge it.
   useEffect(() => {
@@ -87,9 +100,24 @@ export default function Hero() {
     };
     fit();
     window.addEventListener("resize", fit);
-    // Re-fit once the custom display font (Butler) loads — its metrics differ.
-    document.fonts?.ready.then(fit).catch(() => {});
-    return () => window.removeEventListener("resize", fit);
+    // The title stays hidden until its size is final, so the user never sees it
+    // re-fit. Reveal only after the display font (Butler) has loaded, since the
+    // glyph metrics — and therefore the fitted size — change when it swaps in.
+    let active = true;
+    const reveal = () => {
+      if (!active) return;
+      fit();
+      setTitleReady(true);
+    };
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(reveal).catch(reveal);
+    } else {
+      reveal();
+    }
+    return () => {
+      active = false;
+      window.removeEventListener("resize", fit);
+    };
   }, []);
 
   // Canvas engine: DPR sizing, cover-fit draw, RAF + ticking-ref scroll handler.
@@ -158,13 +186,21 @@ export default function Hero() {
         heroTextRef.current.style.opacity = String(Math.max(0, 1 - p / 0.08));
       }
 
-      // Captions: only call setState when the visible set actually changes.
-      const next = new Set<string>();
-      for (const c of captions) if (p >= c.show && p < c.hide) next.add(c.id);
-      const key = [...next].sort().join(",");
-      if (key !== prevVisibleRef.current) {
-        prevVisibleRef.current = key;
-        setVisible(next);
+      // Captions: rise + vertical stretch are driven straight from scroll
+      // position, so they move in lock-step with the swipe (no independent
+      // timeline). The higher they climb, the faster they go (eased), and they
+      // only stretch taller — never squeezed narrower.
+      const travel = viewportHRef.current - 48; // reach ~the top of the screen
+      for (let i = 0; i < captions.length; i++) {
+        const el = captionRefs.current[i];
+        if (!el) continue;
+        const c = captions[i];
+        const enter = clamp01((p - c.show) / 0.035); // fade + rise in
+        const exit = clamp01((p - (c.hide - 0.08)) / 0.08); // suck-up out
+        const eased = exit * exit; // accelerate with distance climbed
+        const y = (1 - enter) * 18 - eased * travel;
+        el.style.opacity = String(enter * (1 - eased));
+        el.style.transform = `translateY(${y}px) scaleY(${1 + eased * 9})`;
       }
 
       tickingRef.current = false;
@@ -194,7 +230,12 @@ export default function Hero() {
       className="scroll-animation relative bg-bg"
     >
       <div className="sticky top-0 h-screen w-full overflow-hidden">
-        <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+        <canvas
+          ref={canvasRef}
+          className={`hero-canvas absolute inset-0 h-full w-full ${
+            loaderLeaving ? "hero-canvas--revealed" : ""
+          }`}
+        />
 
         {/* legibility scrim */}
         <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-b from-black/40 via-transparent to-black/75" />
@@ -220,6 +261,10 @@ export default function Hero() {
             <h1
               ref={titleRef}
               className="display title-butler text-[22vw] text-white md:text-[15vw]"
+              style={{
+                opacity: titleReady ? 1 : 0,
+                transition: "opacity 500ms ease",
+              }}
             >
               FRANCOIS
             </h1>
@@ -262,15 +307,16 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Scroll captions */}
-        {captions.map((c) => (
+        {/* Scroll captions — rise + stretch are driven by scroll position in
+            update(), so they move in lock-step with the swipe. */}
+        {captions.map((c, i) => (
           <div
             key={c.id}
-            className={`pointer-events-none absolute bottom-24 right-5 z-[3] max-w-[300px] text-right transition-all duration-500 md:bottom-28 md:right-10 ${
-              visible.has(c.id)
-                ? "translate-y-0 opacity-100"
-                : "translate-y-4 opacity-0"
-            }`}
+            ref={(el) => {
+              captionRefs.current[i] = el;
+            }}
+            className="pointer-events-none absolute bottom-24 right-5 z-[3] max-w-[300px] text-right will-change-transform md:bottom-28 md:right-10"
+            style={{ transformOrigin: "top right", opacity: 0 }}
           >
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">
               {c.kicker}

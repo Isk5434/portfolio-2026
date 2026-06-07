@@ -320,6 +320,26 @@ body {
 .loader-overlay--leaving .loader-vr-glow {
   animation: vrGradientGlow 1500ms cubic-bezier(0.76, 0, 0.24, 1) forwards;
 }
+
+/* Hero canvas focus-pull: the frame sequence "comes into focus" as the loader
+   wipes away — starts blurred + scaled up + faded, then resolves to a sharp,
+   settled image. Synced with the VR-wipe via the --revealed class. */
+.hero-canvas {
+  opacity: 0;
+  transform: scale(1.08);
+  filter: blur(26px) saturate(1.25) brightness(1.08);
+}
+.hero-canvas--revealed {
+  opacity: 1;
+  transform: scale(1);
+  filter: blur(0) saturate(1) brightness(1);
+  transition:
+    opacity 1500ms ease,
+    transform 1700ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 1500ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform, filter;
+}
+
 @keyframes vrGradientWipe {
   0% {
     --vr-wipe: 0%;
@@ -500,5 +520,13 @@ body {
   .hero-pixel-reveal__cell {
     animation: none;
     opacity: 0;
+  }
+  .hero-canvas {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  .hero-canvas--revealed {
+    transition: none;
   }
 }
