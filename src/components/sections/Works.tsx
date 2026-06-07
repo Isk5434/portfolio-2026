@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { AnimatedSection, AnimatedItem } from "@/components/ui/AnimatedSection";
 
@@ -152,19 +152,45 @@ export default function Works() {
         </AnimatedSection>
 
         <AnimatedSection className="mt-16 grid gap-x-8 gap-y-16 md:grid-cols-2">
-          {works.map((w) => (
+          {works.map((w, i) => (
             <AnimatedItem key={w.n}>
               <a href="#contact" className="group block">
-                <div className="relative aspect-[4/3] overflow-hidden bg-black">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={w.img}
-                    alt={w.title}
-                    className="h-full w-full object-cover opacity-85 grayscale transition-all duration-700 ease-out group-hover:scale-[1.04] group-hover:opacity-100 group-hover:grayscale-0"
-                  />
-                  <span className="absolute left-4 top-4 font-mono text-xs tracking-[0.3em] text-white mix-blend-difference">
-                    {w.n}
-                  </span>
+                {/* Flip card: front artwork turns around its vertical centre to the info back */}
+                <div className="flip-card relative aspect-[4/3]">
+                  <div
+                    className="flip-card-inner absolute inset-0"
+                    style={{ "--flip-delay": `${(-i * 2.25).toFixed(2)}s` } as CSSProperties}
+                  >
+                    {/* front — artwork */}
+                    <div className="flip-face absolute inset-0 overflow-hidden bg-black">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={w.img}
+                        alt={w.title}
+                        className="h-full w-full object-cover opacity-85 grayscale"
+                      />
+                      <span className="absolute left-4 top-4 font-mono text-xs tracking-[0.3em] text-white mix-blend-difference">
+                        {w.n}
+                      </span>
+                    </div>
+                    {/* back — project info */}
+                    <div className="flip-face flip-face--back absolute inset-0 flex flex-col justify-between bg-fg p-5 text-fg-dark md:p-6">
+                      <span className="font-mono text-xs tracking-[0.3em]">
+                        {w.n}
+                      </span>
+                      <div>
+                        <h3 className="display text-2xl md:text-3xl">
+                          {w.title}
+                        </h3>
+                        <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.25em] text-fg-dark/55">
+                          {w.cat} — {w.year}
+                        </p>
+                      </div>
+                      <span className="font-mono text-[11px] uppercase tracking-[0.25em]">
+                        View Project →
+                      </span>
+                    </div>
+                  </div>
                 </div>
                 <div className="mt-5 flex items-baseline justify-between gap-4 border-t border-line pt-4">
                   <h3 className="text-xl font-medium tracking-tight transition-colors group-hover:text-accent md:text-2xl">

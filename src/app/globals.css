@@ -122,8 +122,46 @@ body {
   }
 }
 
+/* Works cards — continuous flip around the vertical (Y) axis, PARCO-style.
+   Holds on each face, then turns; cards stagger via --flip-delay. */
+@keyframes flipY {
+  0%,
+  22% {
+    transform: rotateY(0deg);
+  }
+  50%,
+  72% {
+    transform: rotateY(180deg);
+  }
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+.flip-card {
+  perspective: 1400px;
+}
+.flip-card-inner {
+  transform-style: preserve-3d;
+  animation: flipY var(--flip-duration, 9s) ease-in-out infinite;
+  animation-delay: var(--flip-delay, 0s);
+  will-change: transform;
+}
+.flip-card:hover .flip-card-inner {
+  animation-play-state: paused;
+}
+.flip-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flip-face--back {
+  transform: rotateY(180deg);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .marquee-track {
+    animation: none;
+  }
+  .flip-card-inner {
     animation: none;
   }
 }
