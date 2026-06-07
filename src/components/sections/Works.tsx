@@ -193,7 +193,7 @@ export default function Works() {
         <AnimatedSection className="mt-16 grid gap-x-8 gap-y-16 md:grid-cols-2">
           {works.map((w, i) => (
             <AnimatedItem key={w.n}>
-              <a href="#contact" className="group block">
+              <div className="group block">
                 {/* Flip card: front artwork turns around its vertical centre to the info back */}
                 <div className="flip-card relative aspect-[4/3]">
                   <div
@@ -255,7 +255,7 @@ export default function Works() {
                 <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.25em] text-muted">
                   {w.cat}
                 </p>
-              </a>
+              </div>
             </AnimatedItem>
           ))}
         </AnimatedSection>

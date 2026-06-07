@@ -41,19 +41,75 @@ body {
   overflow-x: hidden;
 }
 
-/* Frame-sequence scroll section — responsive heights */
+/* Frame-sequence scroll section — responsive heights.
+   Scrollable distance (height − 100vh) is tripled so the ~153 hero frames
+   advance 3× slower on scroll. */
 .scroll-animation {
-  height: 400vh;
+  height: 1000vh; /* scrollable 900vh (was 300vh) */
 }
 @media (max-width: 1024px) {
   .scroll-animation {
-    height: 350vh;
+    height: 850vh; /* scrollable 750vh (was 250vh) */
   }
 }
 @media (max-width: 768px) {
   .scroll-animation {
-    height: 300vh;
+    height: 700vh; /* scrollable 600vh (was 200vh) */
   }
+}
+
+/* Landscape guard — hidden by default; only phones in landscape see it.
+   max-height keeps tablets/laptops (taller landscape viewports) unaffected. */
+.rotate-lock {
+  display: none;
+}
+@media screen and (orientation: landscape) and (max-height: 540px) {
+  .rotate-lock {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    padding: 2rem;
+    text-align: center;
+    background: var(--bg);
+    color: var(--fg);
+  }
+  /* Nothing of the page itself is viewable while in landscape. */
+  body > *:not(.rotate-lock) {
+    visibility: hidden;
+  }
+}
+.rotate-lock__icon {
+  width: 52px;
+  height: 52px;
+  color: var(--accent);
+  transform-origin: center;
+  animation: rotate-lock-hint 2.6s ease-in-out infinite;
+}
+@keyframes rotate-lock-hint {
+  0%,
+  35% {
+    transform: rotate(0deg);
+  }
+  65%,
+  100% {
+    transform: rotate(-90deg);
+  }
+}
+.rotate-lock__title {
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+}
+.rotate-lock__hint {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  color: var(--muted);
 }
 
 /* Editorial display type — Poly serif */

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
 import LiveClock from "@/components/ui/LiveClock";
 
 const FRAME_COUNT = 153;
@@ -12,9 +12,6 @@ const MOBILE_FOCUS_X = 0.21;
 const LETTERBOX_COLOR = "#0b0b0b";
 const LOAD_HOLD_MS = 2000;
 const LOAD_EXIT_MS = 1700;
-const PIXEL_REVEAL_COLS = 9;
-const PIXEL_REVEAL_ROWS = 12;
-
 // PARCO-style captions that fade in over the video at scroll thresholds.
 const captions = [
   { id: "c1", show: 0.12, hide: 0.34, kicker: "01 — Motion", text: "Told in motion." },
@@ -22,27 +19,11 @@ const captions = [
   { id: "c3", show: 0.68, hide: 0.94, kicker: "03 — Person", text: "Made by a person." },
 ];
 
-const pixelRevealCells = Array.from(
-  { length: PIXEL_REVEAL_COLS * PIXEL_REVEAL_ROWS },
-  (_, i) => {
-    const x = i % PIXEL_REVEAL_COLS;
-    const y = Math.floor(i / PIXEL_REVEAL_COLS);
-    const distance = Math.hypot(x - 3.2, y - 5.4);
-    const jitter = (x * 37 + y * 19) % 11;
-    return {
-      delay: Math.round(distance * 22 + jitter * 20),
-      bgX: (x / (PIXEL_REVEAL_COLS - 1)) * 100,
-      bgY: (y / (PIXEL_REVEAL_ROWS - 1)) * 100,
-      rotateX: ((x * 11 + y * 7) % 18) - 9,
-      rotateY: 126 + ((x * 13 + y * 5) % 34),
-    };
-  }
-);
-
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const heroTextRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const framesRef = useRef<HTMLImageElement[]>([]);
   const tickingRef = useRef(false);
   const currentFrameRef = useRef(-1);
@@ -51,11 +32,10 @@ export default function Hero() {
   const [framesReady, setFramesReady] = useState(false);
   const [loaderDone, setLoaderDone] = useState(false);
   const [loaderLeaving, setLoaderLeaving] = useState(false);
-  const [pixelRevealDone, setPixelRevealDone] = useState(false);
   const [loadPct, setLoadPct] = useState(0);
   const [visible, setVisible] = useState<Set<string>>(new Set());
 
-  // Preload every frame before the canvas starts; drive the loading bar.
+  // Preload every frame before the canvas starts drawing.
   useEffect(() => {
     let count = 0;
     const imgs: HTMLImageElement[] = [];
@@ -74,12 +54,10 @@ export default function Hero() {
     framesRef.current = imgs;
   }, []);
 
+  // Once every frame is ready: hold on the loader, then dissolve it out.
   useEffect(() => {
     if (!framesReady) return;
 
-    const pixelReveal = window.setTimeout(() => {
-      setPixelRevealDone(true);
-    }, 1350);
     const hold = window.setTimeout(() => {
       setLoaderLeaving(true);
     }, LOAD_HOLD_MS);
@@ -88,11 +66,31 @@ export default function Hero() {
     }, LOAD_HOLD_MS + LOAD_EXIT_MS);
 
     return () => {
-      window.clearTimeout(pixelReveal);
       window.clearTimeout(hold);
       window.clearTimeout(done);
     };
   }, [framesReady]);
+
+  // Keep the hero title within its column on any device (any name length):
+  // shrink the font only when the word would overflow, never enlarge it.
+  useEffect(() => {
+    const el = titleRef.current;
+    if (!el) return;
+    const fit = () => {
+      el.style.fontSize = ""; // restore the CSS (vw-based) size, then measure
+      const css = parseFloat(getComputedStyle(el).fontSize);
+      if (!css || el.clientWidth === 0) return;
+      // single-word title: scrollWidth is its true rendered width
+      if (el.scrollWidth > el.clientWidth) {
+        el.style.fontSize = `${(el.clientWidth / el.scrollWidth) * css * 0.99}px`;
+      }
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    // Re-fit once the custom display font (Butler) loads — its metrics differ.
+    document.fonts?.ready.then(fit).catch(() => {});
+    return () => window.removeEventListener("resize", fit);
+  }, []);
 
   // Canvas engine: DPR sizing, cover-fit draw, RAF + ticking-ref scroll handler.
   useEffect(() => {
@@ -208,13 +206,32 @@ export default function Hero() {
         >
           <div />
           <div>
-            <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.35em] text-white/70">
+            <p
+              className="mb-4 font-mono text-[11px] uppercase tracking-[0.35em] text-white/70"
+              style={{
+                opacity: loaderDone ? 1 : 0,
+                transform: loaderDone ? "none" : "translateY(10px)",
+                transition:
+                  "opacity 800ms ease 120ms, transform 800ms cubic-bezier(0.22, 1, 0.36, 1) 120ms",
+              }}
+            >
               Portfolio — 2026
             </p>
-            <h1 className="display title-butler text-[22vw] text-white md:text-[15vw]">
-              PERSON
+            <h1
+              ref={titleRef}
+              className="display title-butler text-[22vw] text-white md:text-[15vw]"
+            >
+              FRANCOIS
             </h1>
-            <p className="mt-6 max-w-[42ch] text-sm leading-relaxed text-white/85 md:text-base">
+            <p
+              className="mt-6 max-w-[42ch] text-sm leading-relaxed text-white/85 md:text-base"
+              style={{
+                opacity: loaderDone ? 1 : 0,
+                transform: loaderDone ? "none" : "translateY(10px)",
+                transition:
+                  "opacity 800ms ease 280ms, transform 800ms cubic-bezier(0.22, 1, 0.36, 1) 280ms",
+              }}
+            >
               Every scroll turns the film one frame further —
               <br className="hidden md:block" />
               a personal portfolio about the person behind the making.
@@ -262,46 +279,13 @@ export default function Hero() {
           </div>
         ))}
 
-        {/* Frame preload overlay */}
+        {/* Frame preload overlay — progress bar, then a VR-wipe dissolve */}
         {!loaderDone && (
           <div
             className={`loader-overlay absolute inset-0 z-30 ${
               loaderLeaving ? "loader-overlay--leaving" : ""
             }`}
           >
-            {framesReady && !pixelRevealDone && (
-              <div
-                className="hero-pixel-reveal absolute z-[1] grid"
-                style={{
-                  gridTemplateColumns: `repeat(${PIXEL_REVEAL_COLS}, 1fr)`,
-                  gridTemplateRows: `repeat(${PIXEL_REVEAL_ROWS}, 1fr)`,
-                  "--pixel-cols": PIXEL_REVEAL_COLS,
-                  "--pixel-rows": PIXEL_REVEAL_ROWS,
-                } as CSSProperties}
-                aria-hidden="true"
-              >
-                {pixelRevealCells.map((cell, i) => (
-                  <span
-                    key={i}
-                    className="hero-pixel-reveal__cell"
-                    style={
-                      {
-                        "--delay": `${cell.delay}ms`,
-                        "--bg-x": `${cell.bgX}%`,
-                        "--bg-y": `${cell.bgY}%`,
-                        "--rotate-x": `${cell.rotateX}deg`,
-                        "--rotate-y": `${cell.rotateY}deg`,
-                        "--rotate-x-mid": `${cell.rotateX * 0.45}deg`,
-                        "--rotate-y-mid": `${cell.rotateY * 0.42}deg`,
-                        "--rotate-x-end": `${cell.rotateX * 1.12}deg`,
-                        "--rotate-y-end": `${cell.rotateY + 42}deg`,
-                        backgroundImage: `url(${framePath(1)})`,
-                      } as CSSProperties
-                    }
-                  />
-                ))}
-              </div>
-            )}
             <div className="loader-panel absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
               <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-muted">
                 Loading frames

@@ -5,6 +5,9 @@ import { ArrowUpRight } from "@phosphor-icons/react";
 import LiveClock from "@/components/ui/LiveClock";
 import { AnimatedSection, AnimatedItem } from "@/components/ui/AnimatedSection";
 
+const PUBLIC_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const publicPath = (path: `/${string}`) => `${PUBLIC_BASE_PATH}${path}`;
+
 // TODO: replace with your real email + social links.
 const EMAIL = "hello@example.com";
 const socials = [
@@ -34,7 +37,7 @@ export default function Contact() {
         ref={videoRef}
         aria-hidden
         className="absolute inset-0 h-full w-full object-cover opacity-50 grayscale"
-        src="/video/project6.mp4"
+        src={publicPath("/video/project6.mp4")}
         autoPlay
         muted
         loop
