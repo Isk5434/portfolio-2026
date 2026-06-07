@@ -1,26 +1,129 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #0b0b0b;        /* ink black */
+  --fg: #f2f0ea;        /* warm off-white */
+  --muted: #8f8c85;     /* secondary text */
+  --line: rgba(242, 240, 234, 0.14); /* hairline rules */
+  --accent: #ff3b30;    /* restrained red — used sparingly */
+  --bg-light: #ece9e2;  /* inverted (light) sections */
+  --fg-dark: #121110;   /* text on light sections */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-bg-light: var(--bg-light);
+  --color-fg-dark: var(--fg-dark);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: auto; /* Lenis owns the smoothing */
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-geist-sans), "Yu Gothic", "YuGothic",
+    "Hiragino Kaku Gothic ProN", "Noto Sans JP", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Frame-sequence scroll section — responsive heights */
+.scroll-animation {
+  height: 400vh;
+}
+@media (max-width: 1024px) {
+  .scroll-animation {
+    height: 350vh;
+  }
+}
+@media (max-width: 768px) {
+  .scroll-animation {
+    height: 300vh;
+  }
+}
+
+/* Editorial display type — Parisienne script */
+.display {
+  font-family: var(--font-parisienne), "Brush Script MT", cursive;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.05;
+}
+
+/* Infinite marquee */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee {
+  overflow: hidden;
+}
+.marquee-track {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  will-change: transform;
+  animation: marquee var(--marquee-duration, 30s) linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Scroll-hint bouncing dot */
+@keyframes hintdot {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(7px);
+    opacity: 1;
+  }
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Very fine halftone dot-screen — a print-like texture laid over imagery */
+.dot-screen {
+  background-image: radial-gradient(
+    circle,
+    rgba(0, 0, 0, 0.6) 0.6px,
+    transparent 0.7px
+  );
+  background-size: 3px 3px;
+  background-position: 0 0;
+}
+/* Crisp on high-DPR screens: tighten the grid so dots stay hair-fine */
+@media (min-resolution: 2dppx) {
+  .dot-screen {
+    background-size: 2.5px 2.5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
 }
