@@ -1,10 +1,10 @@
 "use client";
 
 import { AnimatedSection, AnimatedItem } from "@/components/ui/AnimatedSection";
-import MassiveOrbitMark from "@/components/ui/MassiveOrbitMark";
+import PrismShards from "@/components/ui/PrismShards";
 
 const index = [
-  ["Name", "TRYSS"],
+  ["Name", "@"],
   ["Role", "Designer / Creative Developer"],
   ["Based", "Japan"],
   ["Focus", "Web · Motion · Art Direction"],
@@ -37,7 +37,7 @@ export default function About() {
 
             <AnimatedItem>
               <p className="mt-10 max-w-[54ch] text-base leading-relaxed text-fg-dark/70 md:text-lg">
-                Hi — I&apos;m TRYSS. [ write your introduction here ] Working
+                Hi — I&apos;m @. [ write your introduction here ] Working
                 across film, motion, and the web, I design the moments where a
                 viewer&apos;s feelings shift. This very site takes a single
                 video, breaks it into 153 frames, and renders them in sync with
@@ -49,19 +49,25 @@ export default function About() {
               <div className="about-index-panel relative mt-14 overflow-hidden border-y border-black/10">
                 <div
                   className="absolute inset-0 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${publicPath("/flower-white.png")})` }}
+                  style={{
+                    backgroundImage: `url(${publicPath("/flower-white.png")})`,
+                    filter: "contrast(1.12) brightness(0.94)",
+                  }}
                   aria-hidden="true"
                 />
                 <div className="sunlight-overlay absolute inset-0" aria-hidden="true" />
                 <div className="dot-screen absolute inset-0 opacity-45" aria-hidden="true" />
                 <div
-                  className="absolute inset-0 z-[8] bg-bg-light/70 backdrop-blur-[2px]"
+                  className="absolute inset-0 z-[8] bg-bg-light/45 backdrop-blur-[2px]"
                   aria-hidden="true"
                 />
-                <div className="pointer-events-none absolute -right-[520px] top-1/2 z-[12] w-[780px] -translate-y-1/2 opacity-50 mix-blend-multiply sm:-right-[650px] sm:w-[960px] md:-right-[780px] md:w-[1180px] lg:-right-[940px] lg:w-[1380px]">
-                  <MassiveOrbitMark style={{ color: "#2f1d06" }} />
+                <div
+                  className="pointer-events-none absolute inset-0 z-[12] opacity-90 mix-blend-screen"
+                  aria-hidden="true"
+                >
+                  <PrismShards />
                 </div>
-                <dl className="relative z-20 divide-y divide-black/15 bg-bg-light/45">
+                <dl className="relative z-20 divide-y divide-black/15 bg-bg-light/38">
                   {index.map(([k, v]) => (
                     <div
                       key={k}

@@ -53,7 +53,7 @@ function crescentPath(cx: number, cy: number, r = 13, bulge = 0.55) {
 const TR = 156; // curved-text radius
 const TEXT_PATH = `M 200 ${200 - TR} A ${TR} ${TR} 0 1 1 200 ${200 + TR} A ${TR} ${TR} 0 1 1 200 ${200 - TR}`;
 const TEXT_LEN = fixed(2 * Math.PI * TR);
-const LABEL = "✦  TRYSS  ·  CREATIVE STUDIO  ·  TO CREATE IS TO CARE  ·  MMXXVI  ";
+const LABEL = "✦  @  ·  CREATIVE STUDIO  ·  TO CREATE IS TO CARE  ·  MMXXVI  ";
 
 type Props = { className?: string; style?: CSSProperties };
 

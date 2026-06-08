@@ -22,7 +22,7 @@ export default function Navbar() {
           href="#top"
           className="pointer-events-auto font-mono text-sm font-semibold tracking-tight"
         >
-          TRYSS©
+          @©
         </a>
 
         <div className="pointer-events-auto hidden items-center gap-7 font-mono text-[11px] uppercase tracking-[0.25em] md:flex">

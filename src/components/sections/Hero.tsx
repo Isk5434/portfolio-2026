@@ -6,11 +6,13 @@ import LiveClock from "@/components/ui/LiveClock";
 const FRAME_COUNT = 153;
 const PUBLIC_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const framePath = (i: number) =>
-  `${PUBLIC_BASE_PATH}/frame/frame_${String(i).padStart(4, "0")}.jpg`;
+  `${PUBLIC_BASE_PATH}/frame/frame_${String(i).padStart(4, "0")}.webp`;
 const MOBILE_FRAME_HEIGHT_RATIO = 0.82;
 const MOBILE_FOCUS_X = 0.21;
 const LETTERBOX_COLOR = "#0b0b0b";
-const LOAD_HOLD_MS = 2000;
+// Brief beat at 100% so the bar reads as "done", then the VR-wipe reveal.
+// (Was 2000ms of dead sit-time — trimmed; the wipe itself is unchanged.)
+const LOAD_HOLD_MS = 500;
 const LOAD_EXIT_MS = 1700;
 // PARCO-style captions that fade in over the video at scroll thresholds.
 const captions = [
@@ -338,7 +340,7 @@ export default function Hero() {
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">
               {c.kicker}
             </p>
-            <p className="mt-2 text-2xl text-white md:text-4xl">{c.text}</p>
+            <p className="title-butler mt-2 text-3xl text-white md:text-5xl">{c.text}</p>
           </div>
         ))}
 

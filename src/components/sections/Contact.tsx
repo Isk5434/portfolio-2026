@@ -101,7 +101,7 @@ export default function Contact() {
           </div>
           <div className="flex items-center gap-6 font-mono text-[11px] tracking-[0.2em] text-muted">
             <LiveClock />
-            <span>© {new Date().getFullYear()} TRYSS</span>
+            <span>© {new Date().getFullYear()} @</span>
           </div>
         </div>
       </div>

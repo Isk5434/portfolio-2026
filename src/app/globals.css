@@ -483,17 +483,35 @@ body {
 .celestial-ring--bold .celestial-ring__sun line {
   opacity: 0.55;
 }
-.massive-orbit__turn,
-.massive-orbit__counter {
+/* Prismatic glass shards — scattered translucent triangles that revolve along
+   small circular orbits and twinkle (Project Sekai / プロセカ vibe).
+   The chip's centre traces a circle while the counter-rotate keeps the
+   triangle's orientation fixed, so it orbits rather than spinning in place. */
+@keyframes shardOrbit {
+  from {
+    transform: rotate(0deg) translate(var(--orbit, 0), 0) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translate(var(--orbit, 0), 0) rotate(-360deg);
+  }
+}
+@keyframes shardTwinkle {
+  from {
+    opacity: var(--o0, 0.4);
+  }
+  to {
+    opacity: var(--o1, 0.7);
+  }
+}
+.prism-shards__chip {
   transform-box: fill-box;
   transform-origin: center;
-  will-change: transform;
-}
-.massive-orbit__turn {
-  animation: celestialSpin 180s linear infinite reverse;
-}
-.massive-orbit__counter {
-  animation: celestialSpin 240s linear infinite;
+  opacity: var(--o0, 0.4);
+  animation-name: shardOrbit, shardTwinkle;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite;
+  filter: drop-shadow(0 1px 6px rgba(150, 200, 255, 0.28));
+  will-change: transform, opacity;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -504,10 +522,12 @@ body {
     animation: none;
   }
   .celestial-ring__spin,
-  .celestial-ring__sun,
-  .massive-orbit__turn,
-  .massive-orbit__counter {
+  .celestial-ring__sun {
     animation: none;
+  }
+  .prism-shards__chip {
+    animation: none;
+    opacity: var(--o0, 0.4);
   }
   .loader-overlay::before,
   .loader-panel {
