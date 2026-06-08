@@ -32,11 +32,12 @@ export default function Contact() {
       id="contact"
       className="relative isolate overflow-hidden bg-bg"
     >
-      {/* Background video (Video Project 6) — grayscale to match the editorial palette */}
+      {/* Background video (Video Project 6) — grayscale to match the editorial palette.
+          Brighter on mobile (opacity-70) where the cherry blossoms are harder to see. */}
       <video
         ref={videoRef}
         aria-hidden
-        className="absolute inset-0 h-full w-full object-cover opacity-50 grayscale"
+        className="absolute inset-0 h-full w-full object-cover opacity-70 grayscale md:opacity-50"
         src={publicPath("/video/project6.mp4")}
         autoPlay
         muted
