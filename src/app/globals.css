@@ -306,8 +306,54 @@ body {
   transform: scale(0.94) rotate(-4deg);
   pointer-events: none;
 }
+/* Loader diagonal marquee bands. Each band parks just off the screen edge it
+   flows from; at its preload threshold (.is-in) it flies across to rest. The
+   ease-out curve front-loads the motion — fast launch, long decelerating tail —
+   so it reads as "shot in and glided to a stop", not a soft fade.
+   They sit above the wipe backdrop (z-0) but below the centre panel (z-2), so
+   the "FRANCOIS / LOADING / %" column always stays on top.
+   --a top-main (flows left, enters from right)  · --b top-mini (40%, from left)
+   --c bottom-main (flows right, from left)       · --d bottom-mini (40%, right) */
+.loader-band {
+  position: absolute;
+  z-index: 1;
+  left: -12%;
+  width: 124%;
+  pointer-events: none;
+  user-select: none;
+  color: rgba(242, 240, 234, 0.82);
+  transition:
+    transform 1300ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 500ms ease;
+  will-change: transform;
+}
+/* The 40%-size partner bands sit a touch dimmer and trail in slightly slower. */
+.loader-band--mini {
+  color: rgba(242, 240, 234, 0.5);
+  transition:
+    transform 1650ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 500ms ease;
+}
+
+/* Parked (off-screen) — band waits at the edge it will fly in from. */
+.loader-band--a { top: 15%; transform: translateX(118%) rotate(7deg); }
+.loader-band--b { top: 25%; transform: translateX(-118%) rotate(7deg); }
+.loader-band--c { bottom: 15%; transform: translateX(-118%) rotate(-7deg); }
+.loader-band--d { bottom: 25%; transform: translateX(118%) rotate(-7deg); }
+
+/* Flown-in (settled). */
+.loader-band--a.is-in { transform: translateX(0) rotate(7deg); }
+.loader-band--b.is-in { transform: translateX(0) rotate(7deg); }
+.loader-band--c.is-in { transform: translateX(0) rotate(-7deg); }
+.loader-band--d.is-in { transform: translateX(0) rotate(-7deg); }
+
 .loader-overlay--leaving {
   pointer-events: none;
+}
+/* Fade the bands away with the rest of the loader during the VR-wipe. */
+.loader-overlay--leaving .loader-band {
+  opacity: 0;
+  transition: opacity 600ms ease;
 }
 .loader-overlay--leaving::before {
   animation: vrGradientWipe 1500ms cubic-bezier(0.76, 0, 0.24, 1) forwards;
@@ -517,6 +563,26 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .marquee-track {
     animation: none;
+  }
+  /* Bands fade in place rather than flying across. */
+  .loader-band {
+    opacity: 0;
+    transition: opacity 250ms ease;
+  }
+  .loader-band.is-in {
+    opacity: 1;
+  }
+  .loader-band--a,
+  .loader-band--a.is-in,
+  .loader-band--b,
+  .loader-band--b.is-in {
+    transform: translateX(0) rotate(7deg);
+  }
+  .loader-band--c,
+  .loader-band--c.is-in,
+  .loader-band--d,
+  .loader-band--d.is-in {
+    transform: translateX(0) rotate(-7deg);
   }
   .flip-card-inner {
     animation: none;

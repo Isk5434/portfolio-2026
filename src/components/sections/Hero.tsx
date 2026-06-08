@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import LiveClock from "@/components/ui/LiveClock";
+import Marquee from "@/components/ui/Marquee";
 
 const FRAME_COUNT = 153;
 const PUBLIC_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -14,6 +15,12 @@ const LETTERBOX_COLOR = "#0b0b0b";
 // (Was 2000ms of dead sit-time — trimmed; the wipe itself is unchanged.)
 const LOAD_HOLD_MS = 500;
 const LOAD_EXIT_MS = 1700;
+// Diagonal marquee bands that slip into the loader at these preload thresholds.
+const LOADER_BAND_TOP_AT = 0.2;
+const LOADER_BAND_BOTTOM_AT = 0.6;
+const loaderBandTop = ["DESIGN", "MOTION", "ART DIRECTION", "WEB", "BRANDING", "3D"];
+const loaderBandBottom = ["NEXT.JS", "REACT", "TYPESCRIPT", "WEBGL", "FIGMA", "AFTER EFFECTS"];
+
 // PARCO-style captions that fade in over the video at scroll thresholds.
 const captions = [
   { id: "c1", show: 0.12, hide: 0.34, kicker: "01 — Motion", text: "Told in motion." },
@@ -351,6 +358,64 @@ export default function Hero() {
               loaderLeaving ? "loader-overlay--leaving" : ""
             }`}
           >
+            {/* Diagonal marquee bands. Each band waits off the screen edge it
+                flows from, then — at its preload threshold — flies in fast and
+                eases to a stop (ease-out), settling into its cruising scroll.
+                Each main band is paired with a ~40%-size counter-flowing band.
+                They sit above the wipe backdrop but below the centre panel. */}
+            {/* top group — flies in at 20% */}
+            <div
+              className={`loader-band loader-band--a display ${
+                loadPct >= LOADER_BAND_TOP_AT ? "is-in" : ""
+              }`}
+              aria-hidden="true"
+            >
+              <Marquee
+                items={loaderBandTop}
+                duration={22}
+                className="text-3xl md:text-6xl"
+              />
+            </div>
+            <div
+              className={`loader-band loader-band--b loader-band--mini display ${
+                loadPct >= LOADER_BAND_TOP_AT ? "is-in" : ""
+              }`}
+              aria-hidden="true"
+            >
+              <Marquee
+                items={loaderBandBottom}
+                reverse
+                duration={16}
+                className="text-xs md:text-2xl"
+              />
+            </div>
+            {/* bottom group — flies in at 60% */}
+            <div
+              className={`loader-band loader-band--c display ${
+                loadPct >= LOADER_BAND_BOTTOM_AT ? "is-in" : ""
+              }`}
+              aria-hidden="true"
+            >
+              <Marquee
+                items={loaderBandBottom}
+                reverse
+                duration={26}
+                className="text-3xl md:text-6xl"
+              />
+            </div>
+            <div
+              className={`loader-band loader-band--d loader-band--mini display ${
+                loadPct >= LOADER_BAND_BOTTOM_AT ? "is-in" : ""
+              }`}
+              aria-hidden="true"
+            >
+              <Marquee
+                items={loaderBandTop}
+                duration={18}
+                className="text-xs md:text-2xl"
+              />
+            </div>
+
             <div className="loader-panel absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
               <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-muted">
                 Loading frames
