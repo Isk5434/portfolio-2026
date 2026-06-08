@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatedSection, AnimatedItem } from "@/components/ui/AnimatedSection";
+import CelestialRing from "@/components/ui/CelestialRing";
 import PrismShards from "@/components/ui/PrismShards";
 
 const index = [
@@ -18,17 +19,22 @@ const publicPath = (path: `/${string}`) => `${PUBLIC_BASE_PATH}${path}`;
 export default function About() {
   return (
     <section id="about" className="relative isolate overflow-hidden bg-bg-light text-fg-dark">
+      {/* Slowly-rotating celestial ornament, top-right, sitting behind the copy */}
+      <div className="pointer-events-none absolute right-3 top-8 z-0 block w-[210px] opacity-95 sm:right-6 sm:top-6 sm:w-[280px] md:right-8 md:top-10 md:w-[420px] lg:right-10 lg:w-[500px]">
+        <CelestialRing className="celestial-ring--bold" style={{ color: "#3f2a0c" }} />
+      </div>
+
       <div className="relative z-10 mx-auto max-w-[1600px] px-5 py-28 md:px-8 md:py-40">
-        <AnimatedSection className="grid gap-12 md:grid-cols-[0.6fr_1.4fr]">
+        <AnimatedSection className="flex flex-col items-center text-center">
           <AnimatedItem>
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-fg-dark/50">
               About
             </p>
           </AnimatedItem>
 
-          <div>
+          <div className="mt-10 w-full">
             <AnimatedItem>
-              <h2 className="display max-w-[16ch] text-4xl md:text-6xl lg:text-7xl">
+              <h2 className="display mx-auto max-w-[16ch] text-4xl md:text-6xl lg:text-7xl">
                 To create is
                 <br />
                 to care for people.
@@ -36,7 +42,7 @@ export default function About() {
             </AnimatedItem>
 
             <AnimatedItem>
-              <p className="mt-10 max-w-[54ch] text-base leading-relaxed text-fg-dark/70 md:text-lg">
+              <p className="mx-auto mt-10 max-w-[54ch] text-base leading-relaxed text-fg-dark/70 md:text-lg">
                 Hi — I&apos;m @. [ write your introduction here ] Working
                 across film, motion, and the web, I design the moments where a
                 viewer&apos;s feelings shift. This very site takes a single
@@ -46,7 +52,7 @@ export default function About() {
             </AnimatedItem>
 
             <AnimatedItem>
-              <div className="about-index-panel relative mt-14 overflow-hidden border-y border-black/10">
+              <div className="about-index-panel relative mx-auto mt-14 max-w-[680px] overflow-hidden border-y border-black/10 text-left">
                 <div
                   className="absolute inset-0 bg-cover bg-center"
                   style={{
