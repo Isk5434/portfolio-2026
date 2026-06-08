@@ -317,8 +317,12 @@ body {
 .loader-band {
   position: absolute;
   z-index: 1;
-  left: -12%;
-  width: 124%;
+  /* 220vw wide, centered — covers any screen including ultrawide 21:9.
+     margin-left pulls the left edge 60vw off screen so the diagonal
+     never shows a gap at the corners. */
+  left: 50%;
+  margin-left: -110vw;
+  width: 220vw;
   pointer-events: none;
   user-select: none;
   color: rgba(242, 240, 234, 0.82);
@@ -335,11 +339,12 @@ body {
     opacity 500ms ease;
 }
 
-/* Parked (off-screen) — band waits at the edge it will fly in from. */
-.loader-band--a { top: 15%; transform: translateX(118%) rotate(7deg); }
-.loader-band--b { top: 25%; transform: translateX(-118%) rotate(7deg); }
-.loader-band--c { bottom: 15%; transform: translateX(-118%) rotate(-7deg); }
-.loader-band--d { bottom: 25%; transform: translateX(118%) rotate(-7deg); }
+/* Parked (off-screen). translateX(±75%) = ±165vw — enough to clear any viewport.
+   The overflow:hidden on .loader-overlay keeps them invisible while parked. */
+.loader-band--a { top: 15%; transform: translateX(75%) rotate(7deg); }
+.loader-band--b { top: 25%; transform: translateX(-75%) rotate(7deg); }
+.loader-band--c { bottom: 15%; transform: translateX(-75%) rotate(-7deg); }
+.loader-band--d { bottom: 25%; transform: translateX(75%) rotate(-7deg); }
 
 /* Flown-in (settled). */
 .loader-band--a.is-in { transform: translateX(0) rotate(7deg); }
@@ -575,15 +580,11 @@ body {
   .loader-band--a,
   .loader-band--a.is-in,
   .loader-band--b,
-  .loader-band--b.is-in {
-    transform: translateX(0) rotate(7deg);
-  }
+  .loader-band--b.is-in  { transform: rotate(7deg); }
   .loader-band--c,
   .loader-band--c.is-in,
   .loader-band--d,
-  .loader-band--d.is-in {
-    transform: translateX(0) rotate(-7deg);
-  }
+  .loader-band--d.is-in  { transform: rotate(-7deg); }
   .flip-card-inner {
     animation: none;
   }
