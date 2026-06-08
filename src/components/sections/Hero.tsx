@@ -11,9 +11,10 @@ const framePath = (i: number) =>
 const MOBILE_FRAME_HEIGHT_RATIO = 0.82;
 const MOBILE_FOCUS_X = 0.21;
 const LETTERBOX_COLOR = "#0b0b0b";
-// Brief beat at 100% so the bar reads as "done", then the VR-wipe reveal.
-// (Was 2000ms of dead sit-time — trimmed; the wipe itself is unchanged.)
-const LOAD_HOLD_MS = 500;
+// Loading screen shows for at least MIN_LOAD_SHOW_MS from page mount.
+// If frames finish early we hold; if they're slow we start the wipe immediately.
+// LOAD_EXIT_MS is the VR-wipe duration and is not counted in the 4s minimum.
+const MIN_LOAD_SHOW_MS = 2100;
 const LOAD_EXIT_MS = 1700;
 // Diagonal marquee bands that slip into the loader at these preload thresholds.
 const LOADER_BAND_TOP_AT = 0.2;
@@ -31,6 +32,7 @@ const captions = [
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
 export default function Hero() {
+  const startTimeRef = useRef(Date.now());
   const sectionRef = useRef<HTMLElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -67,16 +69,21 @@ export default function Hero() {
     framesRef.current = imgs;
   }, []);
 
-  // Once every frame is ready: hold on the loader, then dissolve it out.
+  // Once every frame is ready: wait until MIN_LOAD_SHOW_MS has elapsed from
+  // mount (so the loader is always visible for at least 4s), then VR-wipe out.
+  // If loading is slow the wipe starts as soon as frames are ready.
   useEffect(() => {
     if (!framesReady) return;
 
+    const elapsed = Date.now() - startTimeRef.current;
+    const holdMs = Math.max(0, MIN_LOAD_SHOW_MS - elapsed);
+
     const hold = window.setTimeout(() => {
       setLoaderLeaving(true);
-    }, LOAD_HOLD_MS);
+    }, holdMs);
     const done = window.setTimeout(() => {
       setLoaderDone(true);
-    }, LOAD_HOLD_MS + LOAD_EXIT_MS);
+    }, holdMs + LOAD_EXIT_MS);
 
     return () => {
       window.clearTimeout(hold);
