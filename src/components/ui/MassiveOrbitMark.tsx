@@ -45,7 +45,7 @@ export default function MassiveOrbitMark({ className = "", style }: Props) {
             fill="none"
             stroke="currentColor"
             strokeWidth={ring.width}
-            strokeLinecap="round"
+            strokeLinecap="butt"
             strokeDasharray={ring.dash}
             opacity={ring.opacity}
           />
@@ -80,7 +80,7 @@ export default function MassiveOrbitMark({ className = "", style }: Props) {
           fill="none"
           stroke="currentColor"
           strokeWidth={9}
-          strokeLinecap="round"
+          strokeLinecap="butt"
           opacity={0.16}
         />
         <path
@@ -88,7 +88,7 @@ export default function MassiveOrbitMark({ className = "", style }: Props) {
           fill="none"
           stroke="currentColor"
           strokeWidth={2}
-          strokeLinecap="round"
+          strokeLinecap="butt"
           opacity={0.46}
         />
         {NODES.map((node) => (

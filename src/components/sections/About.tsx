@@ -1,7 +1,6 @@
 "use client";
 
 import { AnimatedSection, AnimatedItem } from "@/components/ui/AnimatedSection";
-import CelestialRing from "@/components/ui/CelestialRing";
 import MassiveOrbitMark from "@/components/ui/MassiveOrbitMark";
 
 const index = [
@@ -19,11 +18,6 @@ const publicPath = (path: `/${string}`) => `${PUBLIC_BASE_PATH}${path}`;
 export default function About() {
   return (
     <section id="about" className="relative isolate overflow-hidden bg-bg-light text-fg-dark">
-      {/* Slowly-rotating celestial ornament, top-right, sitting behind the copy */}
-      <div className="pointer-events-none absolute right-3 top-8 z-0 block w-[210px] opacity-95 sm:right-6 sm:top-6 sm:w-[280px] md:right-8 md:top-10 md:w-[420px] lg:right-10 lg:w-[500px]">
-        <CelestialRing className="celestial-ring--bold" style={{ color: "#3f2a0c" }} />
-      </div>
-
       <div className="relative z-10 mx-auto max-w-[1600px] px-5 py-28 md:px-8 md:py-40">
         <AnimatedSection className="grid gap-12 md:grid-cols-[0.6fr_1.4fr]">
           <AnimatedItem>

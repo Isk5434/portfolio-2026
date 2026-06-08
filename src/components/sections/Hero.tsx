@@ -23,6 +23,7 @@ const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
+  const stickyRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const heroTextRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -129,11 +130,23 @@ export default function Hero() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    // Stable viewport height. On phones the URL bar shows/hides while you swipe,
+    // which thrashes window.innerHeight and makes the frame "breathe" up/down a
+    // few px every scroll — the カタカタ. The sticky wrapper is height:100vh,
+    // and mobile browsers keep 100vh pinned to the large viewport (the address
+    // bar can't change it), so its rendered height is a rock-steady reference.
+    // Desktop has no such bar, so the live innerHeight is fine there.
+    const MOBILE_BP = 768;
+    const viewportH = () =>
+      window.innerWidth <= MOBILE_BP && stickyRef.current
+        ? stickyRef.current.clientHeight
+        : window.innerHeight;
+
     const drawFrame = (index: number) => {
       const img = framesRef.current[index];
       if (!img) return;
       const cw = window.innerWidth;
-      const ch = window.innerHeight;
+      const ch = viewportH();
       ctx.fillStyle = LETTERBOX_COLOR;
       ctx.fillRect(0, 0, cw, ch);
       const imgRatio = img.naturalWidth / img.naturalHeight;
@@ -162,17 +175,18 @@ export default function Hero() {
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const vh = viewportH();
       canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
+      canvas.height = vh * dpr;
       canvas.style.width = window.innerWidth + "px";
-      canvas.style.height = window.innerHeight + "px";
+      canvas.style.height = vh + "px";
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       drawFrame(Math.max(0, currentFrameRef.current));
     };
 
     const update = () => {
       const rect = section.getBoundingClientRect();
-      const scrollable = section.offsetHeight - window.innerHeight;
+      const scrollable = section.offsetHeight - viewportH();
       const p = Math.min(1, Math.max(0, -rect.top / scrollable));
 
       const frameIndex = Math.min(
@@ -229,7 +243,10 @@ export default function Hero() {
       id="top"
       className="scroll-animation relative bg-bg"
     >
-      <div className="sticky top-0 h-screen w-full overflow-hidden">
+      <div
+        ref={stickyRef}
+        className="sticky top-0 h-screen w-full overflow-hidden"
+      >
         <canvas
           ref={canvasRef}
           className={`hero-canvas absolute inset-0 h-full w-full ${
