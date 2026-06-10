@@ -14,7 +14,7 @@ const LETTERBOX_COLOR = "#0b0b0b";
 // Loading screen shows for at least MIN_LOAD_SHOW_MS from page mount.
 // If frames finish early we hold; if they're slow we start the wipe immediately.
 // LOAD_EXIT_MS is the VR-wipe duration and is not counted in the 4s minimum.
-const MIN_LOAD_SHOW_MS = 2100;
+const MIN_LOAD_SHOW_MS = 3000;
 const LOAD_EXIT_MS = 1700;
 // Diagonal marquee bands that slip into the loader at these preload thresholds.
 const LOADER_BAND_TOP_AT = 0.2;
@@ -390,7 +390,7 @@ export default function Hero() {
               aria-hidden="true"
             >
               <Marquee
-                items={loaderBandBottom}
+                items={[...loaderBandBottom, ...loaderBandBottom, ...loaderBandBottom]}
                 reverse
                 duration={16}
                 className="text-xs md:text-2xl"
@@ -417,7 +417,7 @@ export default function Hero() {
               aria-hidden="true"
             >
               <Marquee
-                items={loaderBandTop}
+                items={[...loaderBandTop, ...loaderBandTop, ...loaderBandTop]}
                 duration={18}
                 className="text-xs md:text-2xl"
               />
