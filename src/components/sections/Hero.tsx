@@ -117,22 +117,26 @@ export default function Hero() {
     };
     fit();
     window.addEventListener("resize", fit);
-    // The title stays hidden until its size is final, so the user never sees it
-    // re-fit. Reveal only after the display font (Butler) has loaded, since the
-    // glyph metrics — and therefore the fitted size — change when it swaps in.
+    // Reveal the title once its size is final. We'd rather wait for the display
+    // font (Butler) so the user never sees a re-fit when its metrics swap in —
+    // but Safari resolves document.fonts.ready *seconds* late, which left the
+    // title blank until it popped in. So reveal at the earliest of: Butler
+    // loaded, fonts.ready, or a 600ms hard fallback. If the fallback wins, the
+    // later font callbacks simply re-fit (the title is hidden behind the loader
+    // while this happens, so neither the fallback font nor the re-fit is seen).
     let active = true;
     const reveal = () => {
       if (!active) return;
       fit();
       setTitleReady(true);
     };
-    if (document.fonts?.ready) {
-      document.fonts.ready.then(reveal).catch(reveal);
-    } else {
-      reveal();
-    }
+    const fonts = document.fonts;
+    fonts?.load?.('400 1em "Butler"').then(reveal).catch(reveal);
+    fonts?.ready?.then(reveal).catch(reveal);
+    const fallback = window.setTimeout(reveal, 600);
     return () => {
       active = false;
+      window.clearTimeout(fallback);
       window.removeEventListener("resize", fit);
     };
   }, []);
@@ -378,7 +382,7 @@ export default function Hero() {
               aria-hidden="true"
             >
               <Marquee
-                items={loaderBandTop}
+                items={[...loaderBandTop, ...loaderBandTop, ...loaderBandTop]}
                 duration={22}
                 className="text-3xl md:text-6xl"
               />
@@ -404,7 +408,7 @@ export default function Hero() {
               aria-hidden="true"
             >
               <Marquee
-                items={loaderBandBottom}
+                items={[...loaderBandBottom, ...loaderBandBottom, ...loaderBandBottom]}
                 reverse
                 duration={26}
                 className="text-3xl md:text-6xl"
