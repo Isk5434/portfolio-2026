@@ -15,14 +15,19 @@ function moodFilter(luma: number, back = false) {
 }
 
 // Work imagery. Luma is sampled from the source image and used to auto-darken bright images.
-const works = [
+const works: {
+  n: string; title: string; cat: string; year: string; img: string; luma: number; href?: string; imgPosition?: string; color?: boolean;
+}[] = [
   {
     n: "01",
-    title: "Frame Sequence",
-    cat: "Motion / Web",
+    title: "Nagoya City Museum Supporter HP",
+    cat: "Web",
     year: "2026",
-    img: "/work-images/work-01.png",
-    luma: 99.1,
+    img: "/work-images/work-01.jpg",
+    luma: 80,
+    href: "https://maroinu.pages.dev/",
+    imgPosition: "center bottom",
+    color: true,
   },
   {
     n: "02",
@@ -86,7 +91,7 @@ function FeaturedShowcase() {
           src={publicPath(w.img)}
           alt=""
           aria-hidden
-          style={{ filter: moodFilter(w.luma) }}
+          style={{ filter: w.color ? "none" : moodFilter(w.luma), objectPosition: w.imgPosition }}
           className={`absolute inset-0 h-full w-full object-cover transition-all duration-[1400ms] ease-out ${
             i === active ? "scale-100 opacity-[0.55]" : "scale-105 opacity-0"
           }`}
@@ -193,7 +198,12 @@ export default function Works() {
         <AnimatedSection className="mt-16 grid gap-x-8 gap-y-16 md:grid-cols-2">
           {works.map((w, i) => (
             <AnimatedItem key={w.n}>
-              <div className="group block">
+              <a
+                href={w.href}
+                target={w.href ? "_blank" : undefined}
+                rel={w.href ? "noopener noreferrer" : undefined}
+                className="group block"
+              >
                 {/* Flip card: front artwork turns around its vertical centre to the info back */}
                 <div className="flip-card relative aspect-[4/3]">
                   <div
@@ -206,7 +216,7 @@ export default function Works() {
                       <img
                         src={publicPath(w.img)}
                         alt={w.title}
-                        style={{ filter: moodFilter(w.luma) }}
+                        style={{ filter: w.color ? "none" : moodFilter(w.luma), objectPosition: w.imgPosition }}
                         className="h-full w-full object-cover opacity-90"
                       />
                       <div className="pointer-events-none absolute inset-0 bg-black/15 mix-blend-multiply" />
@@ -221,7 +231,7 @@ export default function Works() {
                         src={publicPath(w.img)}
                         alt=""
                         aria-hidden
-                        style={{ filter: moodFilter(w.luma, true) }}
+                        style={{ filter: w.color ? "none" : moodFilter(w.luma, true), objectPosition: w.imgPosition }}
                         className="absolute inset-0 h-full w-full object-cover opacity-60"
                       />
                       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/55" />
@@ -255,7 +265,7 @@ export default function Works() {
                 <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.25em] text-muted">
                   {w.cat}
                 </p>
-              </div>
+              </a>
             </AnimatedItem>
           ))}
         </AnimatedSection>
