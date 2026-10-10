@@ -3,20 +3,16 @@
 import { AnimatedSection, AnimatedItem } from "@/components/ui/AnimatedSection";
 import CelestialRing from "@/components/ui/CelestialRing";
 import PrismShards from "@/components/ui/PrismShards";
-
-const index = [
-  ["Name", "@"],
-  ["Role", "Designer / Creative Developer"],
-  ["Based", "Japan"],
-  ["Focus", "Web · Motion · Art Direction"],
-  ["Since", "2026"],
-];
+import { useLocale } from "@/lib/i18n";
 
 const PUBLIC_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const publicPath = (path: `/${string}`) => `${PUBLIC_BASE_PATH}${path}`;
 
 /** Inverted (light) section — the B&W flip that gives the page editorial rhythm. */
 export default function About() {
+  const { t } = useLocale();
+  const index = t.about.index;
+
   return (
     <section id="about" className="relative isolate overflow-hidden bg-bg-light text-fg-dark">
       {/* Slowly-rotating celestial ornament, top-right, sitting behind the copy */}
@@ -28,27 +24,25 @@ export default function About() {
         <AnimatedSection className="flex flex-col items-center text-center">
           <AnimatedItem>
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-fg-dark/50">
-              About
+              {t.about.eyebrow}
             </p>
           </AnimatedItem>
 
           <div className="mt-10 w-full">
             <AnimatedItem>
               <h2 className="display mx-auto max-w-[16ch] text-4xl md:text-6xl lg:text-7xl">
-                To create is
+                Start where
                 <br />
-                to care for people.
+                the problem is.
               </h2>
             </AnimatedItem>
 
             <AnimatedItem>
-              <p className="mx-auto mt-10 max-w-[54ch] text-base leading-relaxed text-fg-dark/70 md:text-lg">
-                Hi — I&apos;m @. [ write your introduction here ] Working
-                across film, motion, and the web, I design the moments where a
-                viewer&apos;s feelings shift. This very site takes a single
-                video, breaks it into 153 frames, and renders them in sync with
-                your scroll.
-              </p>
+              <div className="mx-auto mt-10 max-w-[54ch] space-y-5 text-base leading-relaxed text-fg-dark/70 md:text-lg">
+                {t.about.bio.map((para) => (
+                  <p key={para}>{para}</p>
+                ))}
+              </div>
             </AnimatedItem>
 
             <AnimatedItem>
@@ -88,6 +82,25 @@ export default function About() {
                     </div>
                   ))}
                 </dl>
+              </div>
+            </AnimatedItem>
+
+            <AnimatedItem>
+              <div className="mx-auto mt-14 max-w-[680px] text-left">
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.25em] text-fg-dark/60">
+                  {t.about.approachHeading}
+                </p>
+                <ol className="mt-4 divide-y divide-black/10 border-y border-black/10">
+                  {t.about.approach.map((item, i) => (
+                    <li
+                      key={item}
+                      className="flex gap-5 py-3.5 text-sm leading-relaxed text-fg-dark/80 md:text-base"
+                    >
+                      <span className="font-mono text-xs tabular-nums text-fg-dark/45">0{i + 1}</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ol>
               </div>
             </AnimatedItem>
           </div>

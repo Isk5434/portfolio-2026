@@ -4,19 +4,17 @@ import { useEffect, useRef } from "react";
 import { ArrowUpRight } from "@phosphor-icons/react";
 import LiveClock from "@/components/ui/LiveClock";
 import { AnimatedSection, AnimatedItem } from "@/components/ui/AnimatedSection";
+import { useLocale } from "@/lib/i18n";
 
 const PUBLIC_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const publicPath = (path: `/${string}`) => `${PUBLIC_BASE_PATH}${path}`;
 
-// TODO: replace with your real email + social links.
-const EMAIL = "hello@example.com";
-const socials = [
-  { label: "Instagram", href: "#" },
-  { label: "X / Twitter", href: "#" },
-  { label: "GitHub", href: "#" },
-];
+// TODO(content): 公開用メールアドレス・SNSは、公開を確認できたものだけ追加する。
+const GITHUB = { label: "GitHub", href: "https://github.com/isk5434", handle: "github.com/isk5434" };
+const socials = [GITHUB];
 
 export default function Contact() {
+  const { t } = useLocale();
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Guarantee muted autoplay across browsers (React's `muted` prop is flaky).
@@ -60,12 +58,14 @@ export default function Contact() {
         <AnimatedSection>
           <AnimatedItem>
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted">
-              Contact
+              {t.contact.eyebrow}
             </p>
           </AnimatedItem>
           <AnimatedItem>
             <a
-              href={`mailto:${EMAIL}`}
+              href={GITHUB.href}
+              target="_blank"
+              rel="noopener noreferrer"
               className="group mt-8 inline-flex items-start gap-2"
             >
               <h2 className="display text-[13vw] leading-[0.85] transition-colors group-hover:text-accent md:text-[9vw]">
@@ -78,11 +78,16 @@ export default function Contact() {
             </a>
           </AnimatedItem>
           <AnimatedItem>
+            <p className="mt-8 max-w-[48ch] text-sm leading-relaxed text-fg/70">
+              {t.contact.note}
+            </p>
             <a
-              href={`mailto:${EMAIL}`}
-              className="mt-8 inline-block border-b border-line pb-1 font-mono text-sm tracking-wide text-fg/80 transition-colors hover:text-accent"
+              href={GITHUB.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-block border-b border-line pb-1 font-mono text-sm tracking-wide text-fg/80 transition-colors hover:text-accent"
             >
-              {EMAIL}
+              {GITHUB.handle}
             </a>
           </AnimatedItem>
         </AnimatedSection>
@@ -101,7 +106,7 @@ export default function Contact() {
           </div>
           <div className="flex items-center gap-6 font-mono text-[11px] tracking-[0.2em] text-muted">
             <LiveClock />
-            <span>© {new Date().getFullYear()} @</span>
+            <span>© {new Date().getFullYear()} 石川 潮早</span>
           </div>
         </div>
       </div>

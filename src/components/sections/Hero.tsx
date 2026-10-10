@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import LiveClock from "@/components/ui/LiveClock";
 import Marquee from "@/components/ui/Marquee";
+import { useLocale, heroCaptions, marqueeDomains, marqueeTools } from "@/lib/i18n";
 
 const FRAME_COUNT = 153;
 const PUBLIC_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -19,19 +20,21 @@ const LOAD_EXIT_MS = 1700;
 // Diagonal marquee bands that slip into the loader at these preload thresholds.
 const LOADER_BAND_TOP_AT = 0.2;
 const LOADER_BAND_BOTTOM_AT = 0.6;
-const loaderBandTop = ["DESIGN", "MOTION", "ART DIRECTION", "WEB", "BRANDING", "3D"];
-const loaderBandBottom = ["NEXT.JS", "REACT", "TYPESCRIPT", "WEBGL", "FIGMA", "AFTER EFFECTS"];
+const loaderBandTop = marqueeDomains;
+const loaderBandBottom = marqueeTools;
 
 // PARCO-style captions that fade in over the video at scroll thresholds.
-const captions = [
-  { id: "c1", show: 0.12, hide: 0.34, kicker: "01 — Motion", text: "Told in motion." },
-  { id: "c2", show: 0.4, hide: 0.62, kicker: "02 — Craft", text: "Meaning in detail." },
-  { id: "c3", show: 0.68, hide: 0.94, kicker: "03 — Person", text: "Made by a person." },
+// Timing stays fixed across locales; kicker/text copy comes from the dictionary.
+const captionTiming = [
+  { id: "c1", show: 0.12, hide: 0.34 },
+  { id: "c2", show: 0.4, hide: 0.62 },
+  { id: "c3", show: 0.68, hide: 0.94 },
 ];
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
 export default function Hero() {
+  const { t } = useLocale();
   const startTimeRef = useRef(Date.now());
   const sectionRef = useRef<HTMLElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
@@ -162,6 +165,7 @@ export default function Hero() {
         ? stickyRef.current.clientHeight
         : window.innerHeight;
 
+    
     const drawFrame = (index: number) => {
       const img = framesRef.current[index];
       if (!img) return;
@@ -225,10 +229,10 @@ export default function Hero() {
       // timeline). The higher they climb, the faster they go (eased), and they
       // only stretch taller — never squeezed narrower.
       const travel = viewportHRef.current - 48; // reach ~the top of the screen
-      for (let i = 0; i < captions.length; i++) {
+      for (let i = 0; i < captionTiming.length; i++) {
         const el = captionRefs.current[i];
         if (!el) continue;
-        const c = captions[i];
+        const c = captionTiming[i];
         const enter = clamp01((p - c.show) / 0.035); // fade + rise in
         const exit = clamp01((p - (c.hide - 0.08)) / 0.08); // suck-up out
         const eased = exit * exit; // accelerate with distance climbed
@@ -293,17 +297,17 @@ export default function Hero() {
                   "opacity 800ms ease 120ms, transform 800ms cubic-bezier(0.22, 1, 0.36, 1) 120ms",
               }}
             >
-              Portfolio — 2026
+              {t.hero.eyebrow}
             </p>
             <h1
               ref={titleRef}
-              className="display title-butler text-[22vw] text-white md:text-[15vw]"
+              className="display title-butler whitespace-nowrap text-[22vw] text-white md:text-[15vw]"
               style={{
                 opacity: titleReady ? 1 : 0,
                 transition: "opacity 500ms ease",
               }}
             >
-              FRANCOIS
+              Portfolio
             </h1>
             <p
               className="mt-6 max-w-[42ch] text-sm leading-relaxed text-white/85 md:text-base"
@@ -314,9 +318,7 @@ export default function Hero() {
                   "opacity 800ms ease 280ms, transform 800ms cubic-bezier(0.22, 1, 0.36, 1) 280ms",
               }}
             >
-              Every scroll turns the film one frame further —
-              <br className="hidden md:block" />
-              a personal portfolio about the person behind the making.
+              {t.hero.subtitle}
             </p>
           </div>
 
@@ -324,7 +326,7 @@ export default function Hero() {
             {/* scroll hint */}
             <div className="flex items-center gap-3 text-white/80">
               <span className="font-mono text-[10px] uppercase tracking-[0.3em]">
-                Scroll
+                {t.hero.scroll}
               </span>
               <span className="relative flex h-9 w-5 justify-center rounded-full border border-white/40">
                 <span
@@ -337,7 +339,7 @@ export default function Hero() {
             {/* live ticker — PARCO countdown energy */}
             <div className="text-right">
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/50">
-                Based in / Japan
+                {t.hero.basedIn}
               </p>
               <LiveClock className="font-mono text-xs text-white md:text-sm" />
             </div>
@@ -346,7 +348,7 @@ export default function Hero() {
 
         {/* Scroll captions — rise + stretch are driven by scroll position in
             update(), so they move in lock-step with the swipe. */}
-        {captions.map((c, i) => (
+        {captionTiming.map((c, i) => (
           <div
             key={c.id}
             ref={(el) => {
@@ -356,9 +358,11 @@ export default function Hero() {
             style={{ transformOrigin: "top right", opacity: 0 }}
           >
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">
-              {c.kicker}
+              {heroCaptions[i].kicker}
             </p>
-            <p className="title-butler mt-2 text-3xl text-white md:text-5xl">{c.text}</p>
+            <p className="title-butler mt-2 text-3xl text-white md:text-5xl">
+              {heroCaptions[i].text}
+            </p>
           </div>
         ))}
 
@@ -429,7 +433,7 @@ export default function Hero() {
 
             <div className="loader-panel absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
               <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-muted">
-                Loading frames
+                {t.hero.loading}
               </p>
               <div className="mt-5 h-px w-56 overflow-hidden bg-line">
                 <div
