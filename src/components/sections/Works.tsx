@@ -53,8 +53,9 @@ const projects: Record<WorkId, Project> = {
   "show-harness": {
     period: "2026",
     status: "done",
-    img: "/work-images/work-03.png",
-    luma: 36.5,
+    img: "/work-images/show-harness.png",
+    luma: 237.3,
+    color: true,
     tech: ["Python", "NumPy", "Isaac Lab", "SO-101 / LeRobot", "Docker", "pytest"],
     href: "https://showlab.github.io/Show-Harness/",
     links: [
